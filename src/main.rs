@@ -18,14 +18,17 @@ fn build_ui(application: &Application) {
     let number_inc = number.clone();
     let button_inc = gtk::Button::builder().label("Plus 1").build();
 
-    button_inc.connect_clicked(move |_| {
-        number_inc.set(number_inc.get() + 1);
-        println!("The number_inc: {}", number_inc.get());
-    });
-
     let label_info = gtk::Label::builder()
         .label(format!("The number is {}", number.get()))
         .build();
+
+    let label_info_2 = label_info.clone();
+
+    button_inc.connect_clicked(move |_| {
+        number_inc.set(number_inc.get() + 1);
+        label_info_2.set_text(&number_inc.get().to_string());
+        println!("The number_inc: {}", number_inc.get());
+    });
 
     let vbox = gtk::Box::builder()
         .orientation(gtk::Orientation::Vertical)
