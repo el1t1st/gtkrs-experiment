@@ -22,10 +22,13 @@ fn build_ui(application: &Application) {
         .label(format!("The number is {}", number.get()))
         .build();
 
+    // The widgets don't have any data-state connection so you need to
+    // perform all changes by hand
     let label_info_2 = label_info.clone();
 
     button_inc.connect_clicked(move |_| {
         number_inc.set(number_inc.get() + 1);
+        // move the cloned label and set_text to update the text inside the label
         label_info_2.set_text(&number_inc.get().to_string());
         println!("The number_inc: {}", number_inc.get());
     });
