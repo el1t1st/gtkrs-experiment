@@ -1,50 +1,50 @@
+use gdk::prelude::ActionMapExt;
+use gtk::gio;
 use gtk::glib;
-use gtk::prelude::*;
-use gtk::Application;
-use std::cell::Cell;
-use std::rc::Rc;
+use gtk::prelude::{ApplicationExt, ApplicationExtManual, GtkWindowExt};
+use gtk::traits::GtkApplicationExt;
+use gtk::traits::WidgetExt;
 
-static APP_ID: &str = "org.gtkrs-experiment";
+static APP_ID: &str = "org.gtk.testing";
+
+fn build_ui(application: &gtk::Application) {
+    let window = gtk::ApplicationWindow::builder()
+        .application(application)
+        .title("My GTK App")
+        .width_request(360)
+        .build();
+
+    // Add action close to window taking a parameter
+    let action_close = gio::SimpleAction::new("close", None);
+
+    let window_cloned = window.clone();
+    action_close.connect_activate(move |_, _| {
+        window_cloned.close();
+    });
+    // action_close.connect_activate(glib::clone!(@weak window => move |_, _| {
+    //     window.close();
+    // }));
+    window.add_action(&action_close);
+
+    // Create an EventController
+    let eventctl = gtk::EventControllerKey::new();
+
+    eventctl.connect_key_pressed(|_eventctl, keyval, keycode, state| {
+        println!("{:?}", keyval.to_unicode());
+        println!("{:?}", keycode);
+        println!("{:?}", state);
+        gtk::Inhibit(true)
+    });
+    // connect_key_pressed
+    window.add_controller(eventctl);
+
+    window.present();
+}
 
 fn main() -> glib::ExitCode {
     let app = gtk::Application::builder().application_id(APP_ID).build();
     app.connect_activate(build_ui);
+    // Set Shortcuts for Actions
+    app.set_accels_for_action("win.close", &["<Ctrl>W"]);
     app.run()
-}
-
-fn build_ui(application: &Application) {
-    let number = Rc::new(Cell::new(0));
-
-    let number_inc = number.clone();
-    let button_inc = gtk::Button::builder().label("Plus 1").build();
-
-    let label_info = gtk::Label::builder()
-        .label(format!("The number is {}", number.get()))
-        .build();
-
-    // The widgets don't have any data-state connection so you need to
-    // perform all changes by hand
-    let label_info_2 = label_info.clone();
-
-    button_inc.connect_clicked(move |_| {
-        number_inc.set(number_inc.get() + 1);
-        // move the cloned label and set_text to update the text inside the label
-        label_info_2.set_text(&number_inc.get().to_string());
-        println!("The number_inc: {}", number_inc.get());
-    });
-
-    let vbox = gtk::Box::builder()
-        .orientation(gtk::Orientation::Vertical)
-        .build();
-
-    vbox.append(&label_info);
-    vbox.append(&button_inc);
-
-    let window = gtk::ApplicationWindow::builder()
-        .application(application)
-        .title("GTK Counter Experiment")
-        .child(&vbox)
-        .build();
-
-    window.present()
 }
