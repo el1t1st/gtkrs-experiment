@@ -6,6 +6,7 @@ use gtk::traits::GtkApplicationExt;
 use gtk::traits::WidgetExt;
 
 static APP_ID: &str = "org.gtk.testing";
+static CHECK: char = 'a';
 
 fn build_ui(application: &gtk::Application) {
     let window = gtk::ApplicationWindow::builder()
@@ -30,6 +31,14 @@ fn build_ui(application: &gtk::Application) {
     let eventctl = gtk::EventControllerKey::new();
 
     eventctl.connect_key_pressed(|_eventctl, keyval, keycode, state| {
+        let typedchar = keyval.to_unicode().unwrap();
+        println!("typedchar:{:?}", typedchar);
+        println!("CHECK: {:?}", CHECK);
+        if typedchar == CHECK {
+            println!("CORRECT");
+        } else {
+            println!("INCORRECT");
+        }
         println!("{:?}", keyval.to_unicode());
         println!("{:?}", keycode);
         println!("{:?}", state);
